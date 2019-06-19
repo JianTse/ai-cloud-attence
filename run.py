@@ -164,7 +164,7 @@ def  fr_run(imgStr, img, json_dict):
 
     # 根据功能选择不同的函数
     if func == 'register':   # 如果是注册，则保存这个人的信息，需要写如到数据库
-        flag,person_info = registerFunc(img, json_dict,registerDir)
+        flag,person_info = registerFunc(img, json_dict)
         if flag == True:
             # 保存到数据库中
             ret = util.writeOnePersonInfo(imgStr, person_info)
@@ -183,7 +183,7 @@ def  fr_run(imgStr, img, json_dict):
         dstDir = os.path.join(recognizeDir, sonDir)
         util.saveSrcInfo(dstDir, img, dstJson)
     # 显示效果
-    util.drawInfo(img, dstJson)
+    #util.drawInfo(img, dstJson)
     return dstJson
 
 def  processAllPerson():
@@ -212,5 +212,5 @@ def  testWritePersonInfo():
 
 if __name__=='__main__':
     #测试处理tmp文件夹中的所有人
-    processAllPerson()
-    #testWritePersonInfo()
+    #processAllPerson()
+    testWritePersonInfo()
