@@ -1,0 +1,12 @@
+FROM continuumio/anaconda3
+
+WORKDIR /usr/src/app
+
+#COPY facerec facerec
+#COPY face_model.py face_model.pyc face_preprocess.py face_preprocess.pyc file_helper.py file_helper.pyc helper.py helper.pyc mtcnn_detector.py mtcnn_detector.pyc run.py requirements.txt ./
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [ "python", "./run.py" ]
