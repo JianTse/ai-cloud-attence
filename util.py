@@ -3,10 +3,17 @@ import cv2
 import os
 import numpy as np
 import json
-import random
 import base64
 import requests
 import redis
+
+def  filterUserId(red, userId, allPerson):
+    #if red.exists(userId) == False:  # 如果这个人不存在
+    #    return False
+    for idx in range(len(allPerson)):
+        if userId == allPerson[idx]['userId']:  # 如果这个人已经读取过了
+            return False
+    return True
 
 def  covByteToFeats(src):
     featStr = src[0].decode(encoding='utf-8')
@@ -36,8 +43,11 @@ def readOnePersonInfo(red, userId):
     feat3 = covByteToFeats(strFeat3)
     feat4 = covByteToFeats(strFeat4)
     feat5 = covByteToFeats(strFeat5)
+    userName = red.hmget(userId, 'realName')
+    nameStr = userName[0].decode(encoding='utf-8')
     info = {}
     info['userId'] = userId
+    info['userName'] = nameStr
     info['feat'] = [feat0, feat1,feat2, feat3,feat4,feat5]
     return info
 
@@ -51,6 +61,8 @@ def readAllPersonInfo():
     allPerson = []
     for idx in range(len(userIdList)):
         userId = userIdList[idx].decode(encoding='utf-8')
+        if filterUserId(red, userId, allPerson) == False:
+            continue
         info = readOnePersonInfo(red, userId)
         allPerson.append(info)
     return allPerson
@@ -67,10 +79,13 @@ def writeOnePersonInfo(imgStr, info):
     userInfo['feat_3'] = info['feat'][3]
     userInfo['feat_4'] = info['feat'][4]
     userInfo['feat_5'] = info['feat'][5]
-    ret = requests.post(url, data=userInfo)
-    if ret.status_code == 200:
-        return 'successful'
-    return 'failure'
+    retStr = requests.post(url, data=userInfo)
+    retJson = json.loads(retStr.text)
+    if retStr.status_code != 200:
+        return 'failure'
+    elif retJson['code'] == 1:
+        return 'failure'
+    return 'successful'
 
 # 将client端所有信息load进来
 def  loadClientInfo(clientDir):
@@ -151,8 +166,9 @@ def  updateJson(srcJson, info):
         if rect_idx < 0:
             continue
         userId = str(info[idx]['userId'])
+        userName = str(info[idx]['userName'])
         score = float(info[idx]['score'])
-        dstJson['faceList'][rect_idx].update({'userId': userId, 'score': score})
+        dstJson['faceList'][rect_idx].update({'userId': userId, 'score': score, 'userName': userName})
     return dstJson
 
 def saveSrcInfo(saveDir, img, json_dict):

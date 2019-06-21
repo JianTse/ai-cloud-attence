@@ -111,6 +111,7 @@ def identifyFunc(img, json_dict, persons):
         info={}
         info['box'] = boxes[idx]
         info['userId'] = persons[bestId]['userId']
+        info['userName'] = persons[bestId]['userName']
         info['score'] = maxScore
         identifyInfo.append(info)
     return identifyInfo
@@ -171,6 +172,8 @@ def  fr_run(imgStr, img, json_dict):
             if ret == 'successful':
                 fr_init()
                 dstJson.update({'result': u'successful'})
+                dstDir = os.path.join(registerDir, person_info['userId'])
+                util.saveSrcInfo(dstDir, img, dstJson)
             else:
                 dstJson.update({'result': u'failure'})
         else:
@@ -203,7 +206,7 @@ def  processAllPerson():
 fr_init()
 
 def  testWritePersonInfo():
-    personDir = 'C:/Users/Administrator/Desktop/attence/ai-deploy/facerec/data/tmp/18696102288'
+    personDir = 'C:/Users/Administrator/Desktop/attence/3288/ai-deploy/facerec/data/tmp/18696102288'
     encode_data = personDir + '/imgStr.dat'
     f = open(encode_data, 'rb')
     imgStr = f.read()
