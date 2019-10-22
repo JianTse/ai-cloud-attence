@@ -6,6 +6,19 @@ import cv2
 import json
 import base64
 
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, time):
+            return obj.__str__()
+        else:
+            return super(NpEncoder, self).default(obj)
+			
 app = Flask(__name__)
 @app.route('/ai_fr',methods=['post'])
 def ai_fr():
@@ -25,7 +38,8 @@ def ai_fr():
 
         # 云端计算结果，返回json
         dst_json = fr_run(imgStr,cv_img, src_json)
-        strJson = json.dumps(dst_json, ensure_ascii=False)
+        #strJson = json.dumps(dst_json, ensure_ascii=False)
+        strJson = json.dumps(dst_json, cls=MyEncoder)	
         print ('dstJson: ' + strJson)
         return strJson
     except Exception as ex:
